@@ -19,11 +19,10 @@ namespace TestApp1
                 })
                 .ConfigureEventual(config =>
                 {
-                    config.UseTransport<RabbitMq>(setup =>
+                    config.UseTransport<RabbitMq>("RabbitMq" , setup =>
                     {
                         //setup.BusConfiguration.ServiceName = "TestApp1";
                         setup.BusConfiguration.ConnectionString = "amqp://admin:admin@localhost/%2f";
-                        setup.FromConfiguration("RabbitMq");
                     });
 
                     config.Subscribe<BookOrderedConsumer>();

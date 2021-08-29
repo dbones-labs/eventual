@@ -16,7 +16,6 @@
         public virtual void RegisterServices(
                 IServiceCollection services,
                 Setup setup,
-                Func<IServiceProvider, Setup> loadConfigurationIntoSetup,
                 Func<IServiceProvider, Task> startFunc)
         {
 
@@ -30,7 +29,7 @@
             services.AddSingleton<IInitBus>(svc => new DefaultInitBus(svc, startFunc));
             services.AddHostedService<BusHostedService>();
 
-            services.AddSingleton(loadConfigurationIntoSetup);
+            services.AddSingleton(setup);
 
             //setup all the consumers
             //confirm if there are any consumers which are already registered with the container.
@@ -60,7 +59,7 @@
             services.AddTransient(typeof(InvokePublish<>));
 
             var pa = setup.PublishContextActions;
-            pa.InvokePublisherAction = pa.InvokePublisherAction ?? typeof(InvokePublish<>);
+            pa.InvokePublisherAction ??= typeof(InvokePublish<>);
 
             //subscriptions
             services.AddSingleton(typeof(ReceivedMessageMiddleware<>));
@@ -70,9 +69,9 @@
             services.AddTransient(typeof(DefaultMessageAck<>));
 
             var ra = setup.ReceivedContextActions;
-            ra.DeadLetterAction = ra.DeadLetterAction ?? typeof(DefaultMessageAck<>);
-            ra.LoggingAction = ra.LoggingAction ?? typeof(LogReceivedMessage<>);
-            ra.InvokeConsumerAction = ra.InvokeConsumerAction ?? typeof(InvokeConsumer<>);
+            ra.DeadLetterAction ??= typeof(DefaultMessageAck<>);
+            ra.LoggingAction ??= typeof(LogReceivedMessage<>);
+            ra.InvokeConsumerAction ??= typeof(InvokeConsumer<>);
 
         }
     }

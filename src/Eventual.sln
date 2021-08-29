@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApp1", "TestApp1\TestAp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Events", "Events\Events.csproj", "{E7F7B818-4629-4185-9BF0-36E191E3E275}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eventual.Aws", "Eventual.Aws\Eventual.Aws.csproj", "{E7CB7EFD-CCC8-4424-A5B6-44D34D32F56F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eventual.Aws", "Eventual.Aws\Eventual.Aws.csproj", "{E7CB7EFD-CCC8-4424-A5B6-44D34D32F56F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eventual.RabbitMq.Tests", "Eventual.RabbitMq.Tests\Eventual.RabbitMq.Tests.csproj", "{7B9383ED-D514-4CA2-BCD2-3732EF33AE8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,10 @@ Global
 		{E7CB7EFD-CCC8-4424-A5B6-44D34D32F56F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7CB7EFD-CCC8-4424-A5B6-44D34D32F56F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E7CB7EFD-CCC8-4424-A5B6-44D34D32F56F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B9383ED-D514-4CA2-BCD2-3732EF33AE8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B9383ED-D514-4CA2-BCD2-3732EF33AE8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B9383ED-D514-4CA2-BCD2-3732EF33AE8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B9383ED-D514-4CA2-BCD2-3732EF33AE8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
