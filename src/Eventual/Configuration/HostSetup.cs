@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Microsoft.Extensions.Configuration;
     using Middleware.Publishing;
     using Middleware.Subscribing;
 
@@ -10,11 +11,12 @@
     {
         protected internal abstract BusConfiguration GetConfiguration();
         protected internal abstract Factory GetFactory();
-        internal string ConfigurationEntryName { get; set; }
+        //internal string ConfigurationEntryName { get; set; }
 
+        [Obsolete("This has been moved to the UseTransport method as a parameter", true)]
         public void FromConfiguration(string configurationEntry)
         {
-            ConfigurationEntryName = configurationEntry;
+            //ConfigurationEntryName = configurationEntry;
         }
     }
 
@@ -51,6 +53,7 @@
 
         public PublishContextActions PublishContextActions { get; set; }
         public ReceivedContextActions ReceivedContextActions { get; set; }
+        internal IConfiguration Configuration { get; set; }
 
         public void Subscribe(Type consumer, Action<ConsumerSetup> conf = null)
         {
@@ -104,12 +107,31 @@
             //Consumers.Add(consumerSetup);
         }
 
-        public void UseTransport<T>(Action<T> configure) where T : TransportSetup, new()
+        public void UseTransport<T>(string configurationEntry, Action<T> configure) where T : TransportSetup, new()
         {
             var transportSetup = new T();
+
+            if (!string.IsNullOrWhiteSpace(configurationEntry))
+            {
+                Configuration?.GetSection(configurationEntry).Bind(transportSetup.GetConfiguration());
+            }
+
             Transport = transportSetup;
-            configure(transportSetup);
+            configure?.Invoke(transportSetup);
         }
+
+        public void UseTransport<T>(string configurationEntry) where T : TransportSetup, new()
+        {
+            UseTransport<T>(configurationEntry, null);
+        }
+
+        public void UseTransport<T>(Action<T> configure) where T : TransportSetup, new()
+        {
+            UseTransport(null, configure);
+        }
+
+
+
 
         public void AddConsumeAction<T>() where T: IConsumeAction<T>
         {

@@ -14,7 +14,7 @@
 
         public string GetQueueName(Type messageType, string serviceName)
         {
-            return $"{_configuration.ServiceName}.{messageType.FullName}";
+            return $"{_configuration.ServiceName}.{messageType.FullName}".ToLower();
         }
 
         public string GetTopicName(Type messageType, string serviceName)

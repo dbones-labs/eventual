@@ -13,10 +13,9 @@
         public override void RegisterServices(
             IServiceCollection services,
             Setup setup,
-            Func<IServiceProvider, Setup> loadConfigurationIntoSetup,
             Func<IServiceProvider, Task> startFunc)
         {
-            base.RegisterServices(services, setup, loadConfigurationIntoSetup, startFunc);
+            base.RegisterServices(services, setup, startFunc);
             services.AddSingleton<IConnection, RabbitMqConnection>();
             services.AddSingleton<INamingStrategy, RabbitMqNamingStrategy>();
             services.AddSingleton(svc => ((RabbitMqBusConfiguration)Internals.GetConfiguration(setup)));
