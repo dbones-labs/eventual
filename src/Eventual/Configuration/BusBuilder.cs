@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
 
     public class BusBuilder
@@ -11,9 +10,6 @@
         private Setup _setup;
         private Factory _factory;
         private volatile bool _started = false;
-
-        
-
 
         public void SetupContainer(IServiceCollection services, Setup setup)
         {

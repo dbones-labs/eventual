@@ -23,6 +23,8 @@ namespace TestApp1
                     {
                         //setup.BusConfiguration.ServiceName = "TestApp1";
                         setup.BusConfiguration.ConnectionString = "amqp://admin:admin@localhost/%2f";
+                        setup.BusConfiguration.PublishToStream = true;
+                        setup.BusConfiguration.SubscribeFromStream = true;
                     });
 
                     config.Subscribe<BookOrderedConsumer>();

@@ -7,7 +7,6 @@ The idea in a true SOA world all the services will communicate with messages, ma
 
 **features**
 
-- multi-broker support WIP
 - full pub / sub implementation
 - deadletter queue setup
 - direct dotnet core dependency injection support
@@ -23,16 +22,13 @@ public static void Main(string[] args)
     var host = 
       Host
         .CreateDefaultBuilder(args)
-        .UseEventual<RabbitMqHostSetup>((setup) =>
+        .ConfigureEventual(config =>
         {
-            //read from the IConfiguration
-            setup.FromConfiguration("RabbitMq");
+            //choose your transport/broker
+            config.UseTransport<RabbitMq>("RabbitMq");
 
-            //override any settings
-            setup.BusConfiguration.ConnectionString = "amqp://172.22.101.111/%2f";
-
-            //setup any subscriptions (there are a few overloads)
-            setup.ConfigureSubscription<BookOrderedConsumer, BookOrdered>();
+            //setup subscriptions
+            config.Subscribe<BookOrderedConsumer>();
         })
         .ConfigureWebHostDefaults(webBuilder =>
         {

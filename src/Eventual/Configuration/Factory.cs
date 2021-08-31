@@ -4,6 +4,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Infrastructure;
+    using Infrastructure.BrokerStrategies;
     using Infrastructure.Hosting;
     using Infrastructure.Serialization;
     using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +24,7 @@
             services.AddSingleton<ISubscriber, DefaultSubscriber>();
             services.AddSingleton<IBus, DefaultBus>();
             services.AddSingleton<ISerializer, DefaultSerializer>();
+            services.AddSingleton<IBrokerStrategy, DefaultBrokerStrategy>();
 
             services.AddSingleton<IDispatcher, DefaultDispatcher>();
             services.AddSingleton(svc => svc.GetService<Setup>().Transport.GetConfiguration());

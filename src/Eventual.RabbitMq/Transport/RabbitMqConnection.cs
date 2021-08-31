@@ -2,9 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
+    using Infrastructure;
+    using Infrastructure.BrokerStrategies;
     using Microsoft.Extensions.Logging;
     using Middleware;
     using RabbitMQ.Client;
@@ -17,10 +18,12 @@
         private RabbitMQ.Client.IConnection _connection;
         private IModel _channel;
         readonly ConnectionFactory _factory;
-        
-        private readonly ReaderWriterLockSlim _exchangeLock = new ReaderWriterLockSlim();
-        private readonly HashSet<string> _exchanges = new HashSet<string>();
-        
+
+        private readonly Lock _exchangeLock = new();
+        private readonly Dictionary<string, bool> _exchanges = new();
+
+
+
         public RabbitMqConnection(RabbitMqBusConfiguration busConfiguration, ILogger<RabbitMqConnection> logger)
         {
             _logger = logger;
@@ -30,7 +33,8 @@
             _factory = new ConnectionFactory
             {
                 Uri = new Uri(busConfiguration.ConnectionString),
-                AutomaticRecoveryEnabled = true //wanted this to be explicit.
+                AutomaticRecoveryEnabled = true, //wanted this to be explicit
+                ClientProvidedName = busConfiguration.ServiceName
             };
 
             SetupGlobalExchanges();
@@ -82,7 +86,7 @@
             _channel.ExchangeDeclare(_busConfiguration.FailedExchangeName, "fanout", true);
             QueueDeclareOk failedQueue = _channel.QueueDeclare(_busConfiguration.FailedQueueName, true, false);
             _channel.QueueBind(failedQueue.QueueName, _busConfiguration.FailedExchangeName, "");
-            
+
             var failedConsumer = new EventingBasicConsumer(_channel);
 
             void FailedEvent(object sender, BasicDeliverEventArgs args)
@@ -91,7 +95,7 @@
                 var newCount = int.Parse(countValue) + 1;
 
                 var key = $"retry.{newCount}.after";
-                
+
                 //see if we have exhausted the retry queues
                 if (!args.BasicProperties.Headers.TryGetValue(key, out var retryQueue))
                 {
@@ -104,7 +108,7 @@
                 args.BasicProperties.Headers["retry.in"] = retryQueue;
 
                 _channel.BasicPublish(_busConfiguration.DeadLetterExchangeName, args.RoutingKey, args.BasicProperties, args.Body);
-                
+
                 //remove it from the failed queue
                 _channel.BasicAck(args.DeliveryTag, true);
             }
@@ -138,7 +142,7 @@
             {
                 var retryInMilliseconds = _busConfiguration.RetryBackOff[index];
                 var count = index + 1;
-                
+
                 var properties = new Dictionary<string, object>
                 {
                     { "x-dead-letter-exchange", _busConfiguration.RetryExchangeName },
@@ -154,8 +158,8 @@
 
                 _channel.QueueBind(
                     retryQueue.QueueName,
-                    _busConfiguration.DeadLetterExchangeName, 
-                    "", 
+                    _busConfiguration.DeadLetterExchangeName,
+                    "",
                     new Dictionary<string, object>()
                     {
                         { "x-match","all" },
@@ -164,9 +168,9 @@
             }
         }
 
-        public MessagePublishContext<T> CreatePublishContext<T>(string topicName, Message<T> message)
+        public MessagePublishContext<T> CreatePublishContext<T>(string topicName, DestinationType destinationType, Message<T> message)
         {
-            var topic = EnsureExchange(topicName);
+            var topic = EnsureExchange(topicName, destinationType, true);
 
             //create the shell of the properties here.
             var properties = _channel.CreateBasicProperties();
@@ -187,9 +191,9 @@
             return context;
         }
 
-        public Task<IDisposable> RegisterConsumer<TMessage>(string topicName, string queueName, Handle<TMessage> handle)
+        public Task<IDisposable> RegisterConsumer<TMessage>(string topicName, string queueName, SourceType sourceType, Handle<TMessage> handle)
         {
-            var queue = EnsureQueue(queueName, topicName);
+            var queue = EnsureQueue(queueName, topicName, sourceType);
             var consumer = new EventingBasicConsumer(_channel);
 
             void ReceivedEvent(object sender, BasicDeliverEventArgs args)
@@ -202,15 +206,14 @@
                     Reject = () => _channel.BasicReject(args.DeliveryTag, false)
                 };
 
-                
                 var task = handle(context);
                 task.Wait();
             }
 
             consumer.Received += ReceivedEvent;
-
+            if(sourceType == SourceType.Stream) _channel.BasicQos(0, 1, false);
             _channel.BasicConsume(
-                queue: queue.QueueName,
+                queue: queue,
                 autoAck: false,
                 consumer: consumer);
 
@@ -218,37 +221,81 @@
             return Task.FromResult((IDisposable)new RemoveReceivedEvent(remove, _logger));
         }
 
-        private string EnsureExchange(string topicName)
+        private string EnsureExchange(string topicName, DestinationType destinationType, bool setupFromPublisher)
         {
-            try
-            {
-                _exchangeLock.EnterReadLock();
-                if (_exchanges.Contains(topicName)) return topicName;
-            }
-            finally
-            {
-                _exchangeLock.ExitReadLock();
-            }
+            _exchangeLock.GetInsert(
+                () =>
+                {
+                    var done = _exchanges.TryGetValue(topicName, out var fromPublisher);
 
-            try
-            {
-                _exchangeLock.EnterWriteLock();
-                _channel.ExchangeDeclare(topicName, "fanout", true, false);
-                _channel.ExchangeBind(topicName, _busConfiguration.RoutingExchangeName, topicName);
-                _exchanges.Add(topicName);
-                return topicName;
-            }
-            finally
-            {
-                _exchangeLock.ExitWriteLock();
-            }
+                    //not setup
+                    if (!done)
+                    {
+                        return false;
+                    }
 
+                    //we have something setup, but thats enough as we are only a consumer
+                    if (done && !setupFromPublisher)
+                    {
+                        return true;
+                    }
+
+                    //we are a publisher, and the subscriber setup the initial part first
+                    if (setupFromPublisher && !fromPublisher)
+                    {
+                        return false;
+                    }
+
+                    //all done
+                    return true;
+                },
+
+                () =>
+                {
+                    _channel.ExchangeDeclare(topicName, "fanout", true, false);
+                    _channel.ExchangeBind(topicName, _busConfiguration.RoutingExchangeName, topicName);
+                    if (_exchanges.ContainsKey(topicName))
+                    {
+                        _exchanges[topicName] = setupFromPublisher;
+                    }
+                    else
+                    {
+                        _exchanges.Add(topicName, setupFromPublisher);
+                    }
+
+                    if (destinationType != DestinationType.QueueAndStream) return;
+
+                    //add stream (note this is owned by the producer)
+                    var properties = new Dictionary<string, object>
+                    {
+                        { "x-queue-type", "stream" },
+                        { "x-stream-offset", 0 }
+                    };
+
+                    var queue = _channel.QueueDeclare(
+                        queue: topicName,
+                        exclusive: false,
+                        durable: true,
+                        autoDelete: false,
+                        arguments: properties);
+
+                    _channel.QueueBind(queue.QueueName, topicName, topicName);
+                });
+
+            return topicName;
         }
 
-        private QueueDeclareOk EnsureQueue(string queueName, string topicName)
+        private string EnsureQueue(string queueName, string topicName, SourceType sourceType)
         {
-            EnsureExchange(topicName);
+            var destination = sourceType == SourceType.Queue
+                ? DestinationType.Queue
+                : DestinationType.QueueAndStream;
 
+            EnsureExchange(topicName, destination, false);
+
+            if (sourceType != SourceType.Queue) return topicName;
+
+            //note queues are owned by the consumer
             var properties = new Dictionary<string, object>
             {
                 { "x-dead-letter-exchange", _busConfiguration.FailedExchangeName },
@@ -265,8 +312,8 @@
 
             _channel.QueueBind(queue.QueueName, topicName, topicName);
             _channel.QueueBind(queue.QueueName, _busConfiguration.RetryExchangeName, queueName);
+            return queue.QueueName;
 
-            return queue;
         }
 
         public void Dispose()
@@ -275,6 +322,7 @@
             _channel?.Dispose();
         }
     }
+
 
 
 }

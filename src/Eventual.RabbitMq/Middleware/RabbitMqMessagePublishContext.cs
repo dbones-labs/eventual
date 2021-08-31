@@ -1,7 +1,6 @@
 ﻿namespace Eventual.Middleware
 {
     using RabbitMQ.Client;
-    using RabbitMQ.Client.Framing;
 
     public class RabbitMqMessagePublishContext<T> : MessagePublishContext<T>
     {

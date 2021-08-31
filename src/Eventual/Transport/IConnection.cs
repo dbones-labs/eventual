@@ -1,8 +1,8 @@
 ﻿namespace Eventual.Transport
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
+    using Infrastructure.BrokerStrategies;
     using Middleware;
 
     /// <summary>
@@ -21,9 +21,10 @@
         /// </summary>
         /// <typeparam name="T">the message type</typeparam>
         /// <param name="topicName">the topic name</param>
+        /// <param name="destinationType">determins how the publish should be routed</param>
         /// <param name="message">the full message with headers</param>
         /// <returns>context which can be passed into the publish pipeline</returns>
-        MessagePublishContext<T> CreatePublishContext<T>(string topicName, Message<T> message);
+        MessagePublishContext<T> CreatePublishContext<T>(string topicName, DestinationType destinationType, Message<T> message);
         
         /// <summary>
         /// subscribes a consumer with the bus
@@ -33,6 +34,6 @@
         /// <param name="queueName">the queue which the consumer will process from</param>
         /// <param name="handle">the pipeline which will be called</param>
         /// <returns>a disposable to allow the subscription to be cleared up</returns>
-        Task<IDisposable> RegisterConsumer<T>(string topicName, string queueName, Handle<T> handle);
+        Task<IDisposable> RegisterConsumer<T>(string topicName, string queueName, SourceType sourceType, Handle<T> handle);
     }
 }

@@ -18,7 +18,7 @@
             base.RegisterServices(services, setup, startFunc);
             services.AddSingleton<IConnection, RabbitMqConnection>();
             services.AddSingleton<INamingStrategy, RabbitMqNamingStrategy>();
-            services.AddSingleton(svc => ((RabbitMqBusConfiguration)Internals.GetConfiguration(setup)));
+            services.AddSingleton(svc => (RabbitMqBusConfiguration) svc.GetService<BusConfiguration>());
 
             //middleware
             services.AddTransient(typeof(ReadMessageFromQueueIntoContext<>));

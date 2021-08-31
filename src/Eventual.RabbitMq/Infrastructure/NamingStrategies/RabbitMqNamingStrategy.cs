@@ -19,7 +19,7 @@
 
         public string GetTopicName(Type messageType, string serviceName)
         {
-            return messageType.FullName;
+            return messageType.FullName.ToLower();
         }
     }
 }
