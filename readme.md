@@ -26,7 +26,7 @@ public static void Main(string[] args)
         {
             //choose your transport/broker
             config.UseTransport<RabbitMq>("RabbitMq");
-
+            
             //setup subscriptions
             config.Subscribe<BookOrderedConsumer>();
         })
@@ -59,7 +59,7 @@ public async Task Get()
     {
         Author = "dave", 
         Name = "events with eventual"
-    }, CancellationToken.None);
+    });
 
 ```
 
