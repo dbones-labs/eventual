@@ -44,7 +44,7 @@
         /// <summary>
         /// how long a queue should stay before it is removed for inactivity
         /// </summary>
-        public long ExpireQueueAfter { get; set; } = 3600000; //1 hour
+        public long ExpireQueueAfter { get; set; } = 28800000; //8 hours //3600000; //1 hour
 
 
         /// <summary>
