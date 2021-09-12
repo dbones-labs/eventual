@@ -5,7 +5,7 @@
 
     public class Lock
     {
-        private readonly ReaderWriterLockSlim _internalLock = new ReaderWriterLockSlim();
+        private readonly ReaderWriterLockSlim _internalLock = new();
 
         public void GetInsert(Func<bool> read, Action update)
         {
@@ -16,6 +16,8 @@
                 _internalLock.EnterWriteLock();
                 try
                 {
+                    //do another check to be sure.
+                    if (read()) return;
                     update();
                 }
                 finally
