@@ -35,6 +35,9 @@
                 ? _telemetry.ActivitySource.CreateActivity(typeof(T).FullName, ActivityKind.Producer, parentId)
                 : _telemetry.ActivitySource.CreateActivity(typeof(T).FullName, ActivityKind.Producer);
 
+            //user can define -> we try the parent message -> finally we re-use the current id
+            context.Message.CorrelationId ??= _context?.CorrelationId ?? context.Message.Id;
+
             if (activity == null)
             {
                 await next(context);
@@ -43,11 +46,12 @@
 
             activity.SetIdFormat(ActivityIdFormat.W3C);
             activity.AddTag("adapter", "eventual");
+            activity.AddTag("message.id", context.Message.Id);
+            activity.AddTag("message.correlation.id", context.Message.CorrelationId);
 
             using (activity)
             {
                 activity.Start();
-                context.Message.CorrelationId = _context.CorrelationId ?? context.Message.Id;
                 context.Message.OpenTelemetryTraceId = activity.Id;
                 if (!context.Message.Metadata.ContainsKey(Telemetry.Header)) context.Message.Metadata.Add(Telemetry.Header, activity.Id);
                 await next(context);
