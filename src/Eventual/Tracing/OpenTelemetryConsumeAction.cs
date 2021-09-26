@@ -23,16 +23,16 @@
         {
             if (!context.Message.Metadata.TryGetValue(Telemetry.Header, out var traceId))
             {
-                traceId = context.Message.CorrelationId;
+                traceId =  context.Message.OpenTelemetryTraceId;
             }
-
 
             var activity = traceId != null
                 ? _telemetry.ActivitySource.CreateActivity(typeof(T).FullName, ActivityKind.Consumer, traceId)
                 : _telemetry.ActivitySource.CreateActivity(typeof(T).FullName, ActivityKind.Consumer);
 
-            Activity.Current ??= activity;
-            _context.CorrelationId = traceId;
+            Activity.Current = activity;
+            _context.OpenTelemetryTraceId = activity?.Id;
+            _context.CorrelationId = context.Message.CorrelationId;
 
             if (activity == null)
             {
@@ -41,7 +41,10 @@
             }
 
             activity.SetIdFormat(ActivityIdFormat.W3C);
-            activity.AddTag("adapter", "rabbitmq");
+            activity.AddTag("adapter", "eventual");
+            activity.AddTag("message.id", context.Message.Id);
+            activity.AddTag("message.correlation.id", context.Message.CorrelationId);
+
 
             using (activity)
             {
@@ -57,9 +60,11 @@
                     activity.SetTag("otel.status_code", "ERROR");
                     activity.SetTag("otel.status_description", e.Message);
 
-                    var tags = new List<KeyValuePair<string, object>>();
-                    tags.Add(new KeyValuePair<string, object>("message", e.Message));
-                    tags.Add(new KeyValuePair<string, object>("stack", e.StackTrace));
+                    var tags = new List<KeyValuePair<string, object>>
+                    {
+                        new("message", e.Message),
+                        new("stack", e.StackTrace)
+                    };
 
                     ActivityEvent @event = new ActivityEvent("error", tags: new ActivityTagsCollection(tags));
                     activity.AddEvent(@event);

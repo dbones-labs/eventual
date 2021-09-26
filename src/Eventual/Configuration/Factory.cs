@@ -60,7 +60,7 @@
 
             //middleware
             //publishing
-            services.AddSingleton(typeof(MessagePublishContextMiddleware<>));
+            services.AddSingleton(typeof(PublishedMessageMiddleware<>));
             services.AddSingleton(svc => svc.GetService<Setup>().PublishContextActions);
             services.AddTransient(typeof(InvokePublish<>));
             services.AddTransient(typeof(OpenTelemetryPublishAction<>));

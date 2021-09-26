@@ -28,7 +28,7 @@
             }
             else
             {
-                parentId = _context?.CorrelationId;
+                parentId = _context?.OpenTelemetryTraceId;
             }
 
             var activity = parentId != null
@@ -42,11 +42,13 @@
             }
 
             activity.SetIdFormat(ActivityIdFormat.W3C);
+            activity.AddTag("adapter", "eventual");
 
             using (activity)
             {
                 activity.Start();
-                context.Message.CorrelationId = activity.Id;
+                context.Message.CorrelationId = _context.CorrelationId ?? context.Message.Id;
+                context.Message.OpenTelemetryTraceId = activity.Id;
                 if (!context.Message.Metadata.ContainsKey(Telemetry.Header)) context.Message.Metadata.Add(Telemetry.Header, activity.Id);
                 await next(context);
             }
