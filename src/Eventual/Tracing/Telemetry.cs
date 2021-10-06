@@ -1,9 +1,7 @@
-﻿using System;
-using System.Text;
-
-namespace Eventual.Tracing
+﻿namespace Eventual.Tracing
 {
     using System.Diagnostics;
+    using System;
 
     /// <summary>
     /// this is where we control the <see cref="ActivitySource"/>
@@ -22,7 +20,7 @@ namespace Eventual.Tracing
             ActivitySource = new ActivitySource(Name);
         }
 
-        public static string Header = "x-open-telemetry";
+        public static string Header = "open.telemetry";
         public static string Name = "eventual.opentelemetry";
 
         public ActivitySource ActivitySource { get; }

@@ -5,6 +5,7 @@
     using Configuration;
     using Fox.Middleware;
     using Infrastructure.Serialization;
+    using Tracing;
 
     public class PrepareMessageContextForPublish<T> : IPublishAction<T>
     {
