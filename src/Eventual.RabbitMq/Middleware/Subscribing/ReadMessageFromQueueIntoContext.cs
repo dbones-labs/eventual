@@ -21,7 +21,13 @@
         {
             var rbc = (RabbitMqMessageReceivedContext<T>)context;
             var properties = rbc.Payload.BasicProperties;
-            var headers = properties?.Headers?.ToDictionary(key => key.Key, pair => pair.Value.ToString()) 
+            var headers = properties?.Headers?.ToDictionary(key => key.Key, pair =>
+                          {
+                              var val = pair.Value as byte[];
+                              return val == null 
+                                  ? pair.Value.ToString() 
+                                  : Encoding.UTF8.GetString(val);
+                          }) 
                           ?? new Dictionary<string, string>();
 
             var content = Encoding.UTF8.GetString(rbc.Payload.Body.ToArray());

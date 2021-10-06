@@ -31,7 +31,7 @@
 
         public Task ProcessMessage<T>(MessagePublishContext<T> publishContext)
         {
-            var middleware = _serviceProvider.GetService<MessagePublishContextMiddleware<T>>();
+            var middleware = _serviceProvider.GetService<PublishedMessageMiddleware<T>>();
             return middleware.Execute(_serviceProvider, publishContext);
         }
     }

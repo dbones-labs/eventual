@@ -15,8 +15,8 @@
             _internalMiddleware = new Middleware<MessageReceivedContext<T>>();
 
             _internalMiddleware.Add(MakeGeneric<T>(actions.ReadMessageFromQueueIntoContextAction));
-            if (actions.LoggingAction != null) _internalMiddleware.Add(MakeGeneric<T>(actions.LoggingAction));
             if (actions.ApmAction != null) _internalMiddleware.Add(MakeGeneric<T>(actions.ApmAction));
+            if (actions.LoggingAction != null) _internalMiddleware.Add(MakeGeneric<T>(actions.LoggingAction));
             if (actions.DeadLetterAction != null) _internalMiddleware.Add(MakeGeneric<T>(actions.DeadLetterAction));
 
             foreach (var customAction in actions.CustomActions)
