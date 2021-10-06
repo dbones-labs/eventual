@@ -4,11 +4,11 @@
     using System.Threading.Tasks;
     using Fox.Middleware;
 
-    public class MessagePublishContextMiddleware<T> : IMiddleware<MessagePublishContext<T>>
+    public class PublishedMessageMiddleware<T> : IMiddleware<MessagePublishContext<T>>
     {
         private readonly Middleware<MessagePublishContext<T>> _internalMiddleware;
 
-        public MessagePublishContextMiddleware(PublishContextActions actions)
+        public PublishedMessageMiddleware(PublishContextActions actions)
         {
             _internalMiddleware = new Middleware<MessagePublishContext<T>>();
 

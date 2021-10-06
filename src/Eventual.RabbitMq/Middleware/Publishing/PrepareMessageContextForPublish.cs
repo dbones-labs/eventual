@@ -5,6 +5,7 @@
     using Configuration;
     using Fox.Middleware;
     using Infrastructure.Serialization;
+    using Tracing;
 
     public class PrepareMessageContextForPublish<T> : IPublishAction<T>
     {
@@ -28,14 +29,21 @@
             rbc.Body = encoded;
 
             var properties = rbc.Properties;
+            properties.Type = typeof(T).FullName;
             properties.AppId = _busConfiguration.ServiceName;
             properties.DeliveryMode = 2; //topic
             properties.CorrelationId = context.Message.CorrelationId;
             properties.MessageId = context.Message.Id;
-            //properties.ContentEncoding = ""
+
+            //set headers
+            foreach (var entry in context.Message.Metadata)
+            {
+                properties.Headers.Add(entry.Key, entry.Value);
+            }
+
+            //retry headers
             properties.Headers.Add("count", 0);
             properties.Headers.Add("retry.in", 0);
-
             for (var i = 0; i < _busConfiguration.RetryBackOff.Count; i++)
             {
                 properties.Headers.Add($"retry.{i + 1}.after", _busConfiguration.RetryBackOff[i]);

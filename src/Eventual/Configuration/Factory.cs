@@ -11,6 +11,7 @@
     using Middleware;
     using Middleware.Publishing;
     using Middleware.Subscribing;
+    using Tracing;
 
     public abstract class Factory
     {
@@ -53,15 +54,20 @@
                 setup.Subscribe(registeredController.ImplementationType);
             }
 
+            //telemetry
+            services.AddSingleton<Telemetry>();
+            services.AddScoped<TelemetryContext>();
 
             //middleware
             //publishing
-            services.AddSingleton(typeof(MessagePublishContextMiddleware<>));
+            services.AddSingleton(typeof(PublishedMessageMiddleware<>));
             services.AddSingleton(svc => svc.GetService<Setup>().PublishContextActions);
             services.AddTransient(typeof(InvokePublish<>));
+            services.AddTransient(typeof(OpenTelemetryPublishAction<>));
 
             var pa = setup.PublishContextActions;
             pa.InvokePublisherAction ??= typeof(InvokePublish<>);
+            pa.ApmAction ??= typeof(OpenTelemetryPublishAction<>);
 
             //subscriptions
             services.AddSingleton(typeof(ReceivedMessageMiddleware<>));
@@ -69,11 +75,13 @@
             services.AddTransient(typeof(InvokeConsumer<>));
             services.AddTransient(typeof(LogReceivedMessage<>));
             services.AddTransient(typeof(DefaultMessageAck<>));
+            services.AddTransient(typeof(OpenTelemetryConsumeAction<>));
 
             var ra = setup.ReceivedContextActions;
             ra.DeadLetterAction ??= typeof(DefaultMessageAck<>);
             ra.LoggingAction ??= typeof(LogReceivedMessage<>);
             ra.InvokeConsumerAction ??= typeof(InvokeConsumer<>);
+            ra.ApmAction ??= typeof(OpenTelemetryConsumeAction<>);
 
         }
     }
