@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using Tracing;
 
     public class Message<T>
     {
@@ -28,11 +29,29 @@
         /// a user defined correlation id. please try to embrace the <see cref="OpenTelemetryTraceId"/>
         /// </summary>
         public string CorrelationId { get; set; }
-        
+
         /// <summary>
         /// the open telemetry trace id, W3C format (this is normally generated from a parent context)
         /// </summary>
-        public string OpenTelemetryTraceId { get; set; }
+        public string OpenTelemetryTraceId
+        {
+            get
+            {
+                Metadata.TryGetValue(Telemetry.Header, out var value);
+                return value;
+            }
+            set
+            {
+                if (Metadata.ContainsKey(Telemetry.Header))
+                {
+                    Metadata[Telemetry.Header] = value;
+                }
+                else
+                {
+                    Metadata.Add(Telemetry.Header, value);
+                }
+            }
+        }
 
         /// <summary>
         /// any meta data (headers) that should accompany this message for down stream subscribers to process.

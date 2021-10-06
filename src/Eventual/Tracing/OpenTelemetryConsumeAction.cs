@@ -21,17 +21,11 @@
 
         public async Task Execute(MessageReceivedContext<T> context, Next<MessageReceivedContext<T>> next)
         {
-            if (!context.Message.Metadata.TryGetValue(Telemetry.Header, out var traceId))
-            {
-                traceId =  context.Message.OpenTelemetryTraceId;
-            }
-
+            var traceId =  context.Message.OpenTelemetryTraceId;
             var activity = traceId != null
-                ? _telemetry.ActivitySource.CreateActivity(typeof(T).FullName, ActivityKind.Consumer, traceId)
-                : _telemetry.ActivitySource.CreateActivity(typeof(T).FullName, ActivityKind.Consumer);
+                ? _telemetry.ActivitySource.StartActivity(typeof(T).FullName, ActivityKind.Consumer, traceId)
+                : _telemetry.ActivitySource.StartActivity(typeof(T).FullName, ActivityKind.Consumer);
 
-            Activity.Current = activity;
-            _context.OpenTelemetryTraceId = activity?.Id;
             _context.CorrelationId = context.Message.CorrelationId;
 
             if (activity == null)
@@ -40,15 +34,17 @@
                 return;
             }
 
-            activity.SetIdFormat(ActivityIdFormat.W3C);
+            //activity.SetIdFormat(ActivityIdFormat.W3C);
             activity.AddTag("adapter", "eventual");
             activity.AddTag("message.id", context.Message.Id);
             activity.AddTag("message.correlation.id", context.Message.CorrelationId);
 
+            Activity.Current = activity;
+            _context.OpenTelemetryTraceId = activity?.Id;
 
             using (activity)
             {
-                activity.Start();
+                //activity.Start();
                 try
                 {
                     await next(context);
