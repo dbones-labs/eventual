@@ -1,6 +1,6 @@
 ﻿namespace Eventual.Middleware.Subscribing
 {
-    using Fox.Middleware;
+    using Pipes;
 
     public interface IConsumeAction<T> : IAction<MessageReceivedContext<T>> {}
 }

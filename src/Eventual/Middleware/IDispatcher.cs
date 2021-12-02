@@ -1,9 +1,8 @@
 ﻿namespace Eventual.Middleware
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
-    using Fox.Middleware;
+    using Pipes;
     using Microsoft.Extensions.DependencyInjection;
     using Publishing;
     using Subscribing;

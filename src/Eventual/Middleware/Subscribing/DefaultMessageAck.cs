@@ -2,7 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Fox.Middleware;
+    using Pipes;
 
     public class DefaultMessageAck<T> : IConsumeAction<T>
     {
