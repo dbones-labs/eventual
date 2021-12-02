@@ -3,7 +3,7 @@
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Fox.Middleware;
+    using Pipes;
     using Microsoft.Extensions.Logging;
     using Tracing;
 

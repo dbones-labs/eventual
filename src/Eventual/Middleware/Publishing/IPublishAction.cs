@@ -1,6 +1,6 @@
 ﻿namespace Eventual.Middleware.Publishing
 {
-    using Fox.Middleware;
+    using Pipes;
 
     public interface IPublishAction<T> : IAction<MessagePublishContext<T>> { }
 }
