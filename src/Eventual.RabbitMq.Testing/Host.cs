@@ -68,9 +68,9 @@
 
         public string VhostEncoded { get; set; }
 
-        public RabbitClient CreateClient(Action<SetupWrapper> setupAction = null)
+        public RabbitClient CreateClient(Action<SetupWrapper> transport = null)
         {
-            var client = new RabbitClient(_settings, VhostEncoded, _client, setupAction);
+            var client = new RabbitClient(_settings, VhostEncoded, _client, transport);
             _clients.Add(client);
             return client;
         }
