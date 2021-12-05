@@ -8,9 +8,6 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <Version>0.0.9</Version>
-  </PropertyGroup>
 
   <PropertyGroup>
     <PackageId>Eventual</PackageId>
