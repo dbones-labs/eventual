@@ -9,10 +9,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>0.0.9</Version>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <PackageId>Eventual.RabbitMq</PackageId>
     <PackageTitle>Eventual.RabbitMq</PackageTitle>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
