@@ -20,14 +20,10 @@
         Because of = async () =>
         {
             await client1.Bus.Publish(new Wave { Name = "bones" });
-            //host.GetExchanges().WaitFor(x => x.Any(x=> x.Name.StartsWith("eventual")));
-            Wait.For(() =>
-            {
-                var task = host.GetExchanges();
-                var result = task.Result.Any(x => x.Name.StartsWith("eventual"));
-                return result;
-            });
+            
+            host.GetExchanges().WaitFor(x => x.Any(x=> x.Name.StartsWith("eventual")));
 
+            //todo confirm the asyc way issue
             exchanges = host.GetExchanges().Result;
             queues = host.GetQueues().Result;
         };
