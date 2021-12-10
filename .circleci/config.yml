@@ -85,7 +85,7 @@ jobs:
           at: ./
       - run:
           name: wait-for-rabbit
-          command: dockerize -wait http://localhost:15672/#/ -timeout 1m
+          command: curl --retry 5 http://localhost:15672/
       - run:
           name: test
           command: |
