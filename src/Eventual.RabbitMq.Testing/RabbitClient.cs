@@ -1,25 +1,22 @@
 ﻿namespace Eventual.RabbitMq.Testing
 {
     using System;
-    using System.Net.Http;
     using Configuration;
+    using CSharpVitamins;
     using Infrastructure.Hosting;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
     public class RabbitClient : IDisposable
     {
-        private ServiceProvider _container;
-        private static int _clientCount = 0;
+        ServiceProvider _container;
+        //private static int _clientCount = 0;
 
-        public RabbitClient(Settings settings, string vhost, HttpClient client, Action<SetupWrapper> setupAction = null)
-        { 
-            _clientCount++;
-
-
+        public RabbitClient(Settings settings, string vhost,  Action<SetupWrapper> setupAction = null)
+        {
             //a test client of eventual will be used to listen to messages.
             IServiceCollection serviceCollection = new ServiceCollection();
-            serviceCollection.AddSingleton<MessageState>();
+            serviceCollection.AddSingleton<ClientMessageState>();
             serviceCollection.AddLogging(configure => configure.AddConsole());
             serviceCollection.AddEventual(null, setup =>
             {
@@ -30,7 +27,7 @@
                     mq.BusConfiguration.ConnectionString =
                         $"amqp://{settings.User}:{settings.Password}@{settings.Location}:{settings.Port}/{vhost}";
 
-                    mq.BusConfiguration.ServiceName = $"test-client-{_clientCount}";
+                    mq.BusConfiguration.ServiceName = $"test-client-{ShortGuid.NewGuid()}";
 
                 });
 
@@ -42,11 +39,11 @@
             var busService = _container.GetService<IInitBus>();
             busService.Start().Wait(5000);
             Bus = _container.GetService<IBus>();
-            State = _container.GetService<MessageState>();
+            State = _container.GetService<ClientMessageState>();
         }
 
         public IPublisher Bus { get; set; }
-        public MessageState State { get; set; }
+        public ClientMessageState State { get; set; }
 
         
 
