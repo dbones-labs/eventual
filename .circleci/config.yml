@@ -58,6 +58,7 @@ jobs:
             cd ./src
             ls
 
+            dotnet nuget add source https://nuget.pkg.github.com/dbones-labs/index.json -n github -u dbones -p ${GH_TOKEN} --store-password-in-clear-text
             dotnet restore --packages packages
             dotnet build --no-restore --configuration Release --force -p:Version=$APP_VERSION
 
@@ -78,9 +79,13 @@ jobs:
   test:
     docker:
       - image: mcr.microsoft.com/dotnet/core/sdk:5.0
+      - image: rabbitmq:management-alpine
     steps:
       - attach_workspace:
           at: ./
+      - run:
+          name: wait-for-rabbit
+          command: dockerize -wait http://localhost:15672/#/ -timeout 1m
       - run:
           name: test
           command: |
