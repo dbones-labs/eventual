@@ -4,9 +4,9 @@
 
     internal class TestConsumer<T> : IConsumer<T>
     {
-        private readonly MessageState _state;
+        private readonly ClientMessageState _state;
 
-        public TestConsumer(MessageState state)
+        public TestConsumer(ClientMessageState state)
         {
             _state = state;
         }

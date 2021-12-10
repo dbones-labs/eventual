@@ -6,7 +6,7 @@
     using System.Linq;
     using System.Runtime.CompilerServices;
 
-    public class MessageState : INotifyPropertyChanged
+    public class ClientMessageState : INotifyPropertyChanged
     {
 
         private readonly IList<object> _messages = new List<object>();
@@ -49,5 +49,29 @@
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+    }
+
+
+    public class HostMessageState
+    {
+        readonly List<ClientMessageState> _clientMessageStates = new();
+
+        public void Add(ClientMessageState clientMessageState)
+        {
+            _clientMessageStates.Add(clientMessageState);
+        }
+
+        public IEnumerable<Object> AllMessages
+        {
+            get
+            {
+                return _clientMessageStates.SelectMany(x => x.AllMessages);
+            }
+        }
+
+        public IEnumerable<Message<T>> Messages<T>() where T : class
+        {
+            return AllMessages.Where(x => x is Message<T>).Cast<Message<T>>().ToList();
+        }
     }
 }
