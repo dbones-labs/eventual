@@ -78,7 +78,7 @@ jobs:
 
   test:
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:5.0
+      - image: mcr.microsoft.com/dotnet/sdk:5.0
       - image: rabbitmq:management-alpine
     steps:
       - attach_workspace:
