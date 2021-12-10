@@ -63,7 +63,7 @@ jobs:
             dotnet build --no-restore --configuration Release --force -p:Version=$APP_VERSION
 
             mkdir ./../nupkgs
-            mv ./bin/**/*.nupkg ./../nupkgs
+            mv ./**/bin/**/*.nupkg ./../nupkgs
 
             cd ./../nupkgs
             rm *.symbols.nupkg
