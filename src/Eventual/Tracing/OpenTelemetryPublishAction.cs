@@ -2,7 +2,7 @@
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Fox.Middleware;
+    using Pipes;
     using Middleware;
     using Middleware.Publishing;
 

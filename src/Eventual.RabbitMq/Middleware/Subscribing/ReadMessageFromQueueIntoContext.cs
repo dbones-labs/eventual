@@ -5,7 +5,7 @@
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using Fox.Middleware;
+    using Pipes;
     using Infrastructure.Serialization;
 
     public class ReadMessageFromQueueIntoContext<T> : IConsumeAction<T>

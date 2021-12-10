@@ -1,7 +1,7 @@
 ﻿namespace Eventual.Middleware.Publishing
 {
     using System.Threading.Tasks;
-    using Fox.Middleware;
+    using Pipes;
 
     public class InvokePublish<T> : IPublishAction<T>
     {

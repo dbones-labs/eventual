@@ -3,7 +3,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using Configuration;
-    using Fox.Middleware;
+    using Pipes;
     using Infrastructure.Serialization;
     using Tracing;
 

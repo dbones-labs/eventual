@@ -2,7 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Fox.Middleware;
+    using Pipes;
     using Microsoft.Extensions.DependencyInjection;
 
     public class ReceivedMessageMiddleware<T> : IMiddleware<MessageReceivedContext<T>>

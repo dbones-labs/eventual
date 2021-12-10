@@ -1,91 +1,45 @@
-# Eventual => dotnet pub-sub messaging
+# eventual
 
-this is a wip project to see how we can support the publish / subscribe pattern with multiple brokers
+[![release](https://img.shields.io/github/v/release/dbones-labs/eventual?logo=nuget)](https://github.com/dbones-labs/eventual/releases) [![Nuget](https://img.shields.io/badge/nuget-eventual-blue)](https://github.com/orgs/dbones-labs/packages?repo_name=eventual)
+[![docs](https://img.shields.io/badge/docs-eventual-blue)](https://dbones-labs.github.io/eventual/)
 
-The idea in a true SOA world all the services will communicate with messages, making the platform to become **Eventual**ly consistent.
+[![dbones-labs](https://circleci.com/gh/dbones-labs/eventual.svg?style=shield)](https://app.circleci.com/pipelines/github/dbones-labs/eventual) 
+[![codecov](https://codecov.io/gh/dbones-labs/eventual/branch/master/graph/badge.svg?token=0AE8TL5PR3)](undefined) 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/efd93328aebe4815a5710df7bbce5d03)](https://www.codacy.com/gh/dbones-labs/eventual/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dbones-labs/eventual&amp;utm_campaign=Badge_Grade) 
 
 
-**features**
+Short description
 
-- full pub / sub implementation
-- deadletter queue setup
-- direct dotnet core dependency injection support
-- opinionated broker setup
-- middleware support
-- async pattern WIP
+## Features
 
-## Example RabbitMq Setup
+- Main features
 
-```
-public static void Main(string[] args)
-{
-    var host = 
-      Host
-        .CreateDefaultBuilder(args)
-        .ConfigureEventual(config =>
-        {
-            //choose your transport/broker
-            config.UseTransport<RabbitMq>("RabbitMq");
-            
-            //setup subscriptions
-            config.Subscribe<BookOrderedConsumer>();
-        })
-        .ConfigureWebHostDefaults(webBuilder =>
-        {
-            webBuilder.UseStartup<Startup>();
-        });
+# Downloads
 
-    host.Build().Run();
-}
-```
+you can find all packages here:
 
-## Publish
+[![Nuget](https://img.shields.io/badge/nuget-eventual-blue)](https://github.com/orgs/dbones-labs/packages?repo_name=eventual)
 
-```
-private readonly IBus _bus;
 
-public EpicController(IBus bus)
-{
-    _bus = bus;
-}
+## Major releases
 
-[HttpPost]
-public async Task Get()
-{
-    // do awesome things
+[![Nuget](https://img.shields.io/github/v/release/dbones-labs/eventual?logo=nuget)](https://github.com/dbones-labs/eventual/releases)
 
-    //publish events
-    await _bus.Publish(new BookOrdered 
-    {
-        Author = "dave", 
-        Name = "events with eventual"
-    });
+We use Milestones to represent an notable release
 
-```
 
-## Subscribe and consume
+## Patch / feature releases
 
-```
-public class BookOrderedConsumer : IConsumer<BookOrdered>
-{
-    private readonly ILogger<BookOrderedConsumer> _logger;
+We use a variant of Githubflow, so all feature branches have their own pre-release packages
 
-    public BookOrderedConsumer(ILogger<BookOrderedConsumer> logger)
-    {
-        _logger = logger;
-    }
 
-    public Task Handle(Message<BookOrdered> message, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation($"wa hey someone ordered : {message.Body.Name}");
 
-        return Task.CompletedTask;
-    }
-}
-```
+# Docs and examples
 
-**really awesome notes:**
+check out our docs for examples and more information
 
-- https://derickbailey.com/2015/09/02/rabbitmq-best-practices-for-designing-exchanges-queues-and-bindings/
-- https://jack-vanlightly.com/blog/2017/12/5/rabbitmq-vs-kafka-part-2-rabbitmq-messaging-patterns-and-topologies
-- http://dbones.github.io/2020/01/retries-and-deadletters/
+[![docs](https://img.shields.io/badge/docs-eventual-blue)](https://dbones-labs.github.io/eventual/)
+
+## Use of this library
+
+As this is about auditing your code, it is recommend that you fully test your use-cases to ensure that the requirement is met fully.
