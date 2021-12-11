@@ -58,11 +58,12 @@ jobs:
             cd ./src
             ls
 
+            dotnet nuget add source https://nuget.pkg.github.com/dbones-labs/index.json -n github -u dbones -p ${GH_TOKEN} --store-password-in-clear-text
             dotnet restore --packages packages
             dotnet build --no-restore --configuration Release --force -p:Version=$APP_VERSION
 
             mkdir ./../nupkgs
-            mv ./bin/**/*.nupkg ./../nupkgs
+            mv ./**/bin/**/*.nupkg ./../nupkgs
 
             cd ./../nupkgs
             rm *.symbols.nupkg
@@ -77,10 +78,14 @@ jobs:
 
   test:
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:5.0
+      - image: mcr.microsoft.com/dotnet/sdk:5.0
+      - image: rabbitmq:management-alpine
     steps:
       - attach_workspace:
           at: ./
+      - run:
+          name: wait-for-rabbit
+          command: wget --retry-connrefused --waitretry=1 --tries=5 --read-timeout=20 --timeout=15 http://localhost:15672/
       - run:
           name: test
           command: |
@@ -97,7 +102,7 @@ jobs:
           paths:
             - results
             - src
-      - store_artifacts:
+      - store_test_results:
           path: results
 
   upload_result:
@@ -139,6 +144,7 @@ workflows:
               ignore:
                 - docs
       - build:
+          context: build-ctx
           requires:
             - setup
       - test:
