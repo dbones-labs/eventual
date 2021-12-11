@@ -16,7 +16,7 @@
 
         public void Dispose()
         {
-            _logger.LogError("removing subscription");
+            _logger.LogInformation("removing subscription");
             _removeHandler();
         }
     }
