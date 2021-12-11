@@ -102,7 +102,7 @@ jobs:
           paths:
             - results
             - src
-      - store_artifacts:
+      - store_test_results:
           path: results
 
   upload_result:
