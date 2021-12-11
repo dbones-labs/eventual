@@ -85,7 +85,7 @@ jobs:
           at: ./
       - run:
           name: wait-for-rabbit
-          command: curl --retry 5 --retry-delay 1 --retry-all-errors http://localhost:15672/
+          command: wget --retry-connrefused --waitretry=1 --tries=5 --read-timeout=20 --timeout=15 http://localhost:15672/
       - run:
           name: test
           command: |
