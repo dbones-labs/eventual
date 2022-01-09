@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using Microsoft.Extensions.Configuration;
     using Middleware.Publishing;
     using Middleware.Subscribing;
@@ -130,9 +131,6 @@
             UseTransport(null, configure);
         }
 
-
-
-
         public void AddConsumeAction<T>() where T: IConsumeAction<T>
         {
             ReceivedContextActions.CustomActions.Add(typeof(T));
@@ -143,6 +141,31 @@
             PublishContextActions.CustomActions.Add(typeof(T));
         }
 
+    }
+
+    public static class SetupExtensions
+    {
+        public static void SetupConsumersFromEntryAssembly(this Setup setup)
+        {
+            setup.SetupConsumersFromAssembly(Assembly.GetEntryAssembly());
+        }
+
+        public static void SetupConsumersFromAssemblyContaining<T>(this Setup setup)
+        {
+           setup.SetupConsumersFromAssembly(typeof(T).Assembly);
+        }
+
+        public static void SetupConsumersFromAssembly(this Setup setup, Assembly assembly)
+        {
+            var types = assembly
+                .GetTypes()
+                .Where(x => typeof(IConsumer).IsAssignableFrom(x));
+
+            foreach (var type in types)
+            {
+                setup.Subscribe(type);
+            }
+        }
     }
 
 }
