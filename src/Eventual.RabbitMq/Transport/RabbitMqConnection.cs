@@ -11,7 +11,7 @@
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
 
-    public class RabbitMqConnection : IConnection
+    public class RabbitMqConnection : IConnection, IDisposable
     {
         private readonly ILogger<RabbitMqConnection> _logger;
         private readonly RabbitMqBusConfiguration _busConfiguration;
@@ -21,7 +21,6 @@
 
         private readonly Lock _exchangeLock = new();
         private readonly Dictionary<string, bool> _exchanges = new();
-
 
 
         public RabbitMqConnection(RabbitMqBusConfiguration busConfiguration, ILogger<RabbitMqConnection> logger)
@@ -322,7 +321,4 @@
             _channel?.Dispose();
         }
     }
-
-
-
 }
